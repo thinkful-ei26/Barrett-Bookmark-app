@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>Bookmarks</h1>
-        <button>Add Bookmark</button>
+        <button class="add-bookmark-button">Add Bookmark</button>
         <select name="minimum-rating" id="minimum-rating-dropdown">
                 <option value="">---Filter by Rating---</option>
                 <option value="1-star">1 Star</option>
@@ -20,42 +20,27 @@
                 <option value="4-star">4 Stars</option>
                 <option value="5-star">5 Stars</option>
             </select>
-
-        <form id="add-bookmark-form">
-            
-            <label for="name">New Bookmark Name:</label>
-            <input type="text" name="new-bookmark-name" id="name" class="js-new-bookmark-name">
-            
-            <label for="url">URL:</label>
-            <input type="text" name="new-bookmark-url" id="url" class="js-new-bookmark-url">
-            
-            <div>
-                <label for="description">Description:</label>
-                <input type="text" name="new-bookmark-description" id="description" class="js-new-bookmark-description">
-            </div>
-            <div class="rating-buttons">
-                <input type="radio" name="rating" value="1-star">1 star<br>
-                <input type="radio" name="rating" value="2-stars">2 stars<br>
-                <input type="radio" name="rating" value="3-stars">3 stars<br>
-                <input type="radio" name="rating" value="4-stars">4 stars<br>
-                <input type="radio" name="rating" value="5-stars">5 stars<br>
-            </div>
-            <input type="submit" value="Add">
-            <button>Cancel</button>
-        </form>
         
-        <div class="bookmark">
-            <p class="bookmark-name">Bookmark</p>
-            <span class="bookmark-rating">Rating: 5 stars</span>
-        </div>
+        <section class="add-bookmark-section">
+        </section>
 
-        <div class="bookmark">
+        <ul class="bookmarks js-bookmarks">
+
+            <li class="bookmark-default">
+                <p class="bookmark-name">Bookmark</p>
+                <span class="bookmark-rating">Rating: 5 stars</span>
+            </li>
+
+        
+            <li class="bookmark-expanded" data-item-id="">
                 <p class="bookmark-name">Bookmark</p>
                 <p class="bookmark-description">Description goes here!</p>
                 <span class="bookmark-rating">Rating: 5 stars</span>
                 <button>Visit Site</button>
-                <button>Delete</button>
-            </div>
+                <button class="delete-bookmark-button">Delete</button>
+                <button class="hide-bookmark-button">Hide</button>
+            </li>
+        </ul>    
     </div>
 
 

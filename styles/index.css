@@ -11,8 +11,23 @@ body {
     margin: 0 auto;
 }
 
-.bookmark {
+.bookmark-default {
     border: 1px solid black;
     margin-top:  30px; 
     padding-bottom: 10px;
+}
+
+.bookmark-expanded {
+    border: 1px solid black;
+    margin-top:  30px; 
+    padding-bottom: 10px;
+}
+
+.bookmarks {
+    list-style: none;
+    padding: 10px;
+}
+
+.bookmark-rating {
+    float: right;
 }
