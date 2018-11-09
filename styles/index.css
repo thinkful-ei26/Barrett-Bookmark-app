@@ -31,3 +31,7 @@ body {
 .bookmark-rating {
     float: right;
 }
+
+.error-content{
+    border: 1px solid red;
+}

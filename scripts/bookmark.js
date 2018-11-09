@@ -1,23 +1,11 @@
 'use strict';
 /*eslint indent: ["error", "tab"]*/
 
-const STORE = {
-	bookmarks: [
-		{
-			title: 'bookmark',
-			url: 'url_link',
-			rating: '1-star',
-			description: 'description string',
-			id: 'asdjfnvbsi',
-			expanded: false,
-		}],
-	adding: false,
-	minimumRating: null,
-};
+const bookmark = (function () {
 
-function generateBookmarkDefaultElement(item) {
-	if (item.expanded === true)
-		return `
+	function generateBookmarkDefaultElement(item) {
+		if (item.expanded === true)
+			return `
 			<li class="bookmark bookmark-expanded" data-item-id="${item.id}">
 				<p class="bookmark-name">${item.title}</p>
 				<p class="bookmark-description">${item.description}</p>
@@ -26,25 +14,43 @@ function generateBookmarkDefaultElement(item) {
 				<button class="delete-bookmark-button">Delete</button>
 				<button class="hide-bookmark-button">Hide</button>
 			</li>`;
-	return `
+		return `
 		<li class="bookmark bookmark-default" data-item-id="${item.id}"> 
 			<p class="bookmark-name">${item.title}</p>
 			<button type="button" class="expand-bookmark-button">Expand</button>
 			<span class="bookmark-rating">Rating: ${item.rating}</span>
 		</li>`;
-}
+	}
 
-function generateBookmarkDefaultItemString(bookmarks) {
-	const items = bookmarks.map((item) => generateBookmarkDefaultElement(item));
-	return items.join('');
-}
+	function generateBookmarkDefaultItemString(bookmarks) {
+		console.log(bookmarks);
+		const items = bookmarks.map((item) => generateBookmarkDefaultElement(item));
+	
+		return items.join('');
+	}
 
-function renderBookmarks() {
-// renders DOM according to the current state of the store/api
-// default state is a list view of currently added bookmarks in condensed view showing
-// only name and rating, no rating filter on, add button and minimum rating dropdown
-	if (STORE.adding === true) {
-		const addBookmarkForm = `
+	function renderBookmarks() {
+		// renders DOM according to the current state of the store/api
+		// default state is a list view of currently added bookmarks in condensed view showing
+		// only name and rating, no rating filter on, add button and minimum rating dropdown
+		let bookmarks = [ ...STORE.bookmarks];
+
+		if (STORE.error) {
+			const el = generateError(STORE.error);
+			$('.error').html(el);
+		} else {
+			$('.error').empty();
+		}
+
+		if (STORE.minimumRating) {
+			bookmarks = bookmarks.filter((bookmark) => bookmark.rating === STORE.minimumRating);
+		}
+
+		const bookmarkDefaultItemString = generateBookmarkDefaultItemString(bookmarks); 
+		$('.js-bookmarks').html(bookmarkDefaultItemString);
+
+		if (STORE.adding === true) {
+			const addBookmarkForm = `
 	<form id="add-bookmark-form" name="newBookmarkForm">
                 
 		<label for="name">New Bookmark Name:</label>
@@ -67,120 +73,158 @@ function renderBookmarks() {
 		<input class="submit-bookmark-button" type="submit" value="Submit">
 		<button type="button" class="cancel-add-bookmark-button">Cancel</button>
 	</form>`;
-		$('.add-bookmark-section').html(addBookmarkForm);
+			$('.add-bookmark-section').html(addBookmarkForm);
+		}
+		else {
+			$('.add-bookmark-section').html('');
+		}
 	}
-	else {
-		$('.add-bookmark-section').html('');
-	}
-	const bookmarkDefaultItemString = generateBookmarkDefaultItemString(STORE.bookmarks); 
-	$('.js-bookmarks').html(bookmarkDefaultItemString);
-}
 
 
 
-function handleAddBookmarksButtonClicked() {
-// add bookmarks to list
-// re-render with add bookmark menu: name, url, description, rating, hidden id, add and cancel buttons
-// submit adds new item to local store and api
-	$('.add-bookmark-button').on('click', () => {
-		STORE.adding = true;
-		renderBookmarks();
-	});
-}
-
-function handleCancelAddBookmarks() {
-	$('.add-bookmark-section').on('click', '.cancel-add-bookmark-button', () => {
-		STORE.adding = false;
-		renderBookmarks();
-	});
-}
-
-function handleAddNewBookmark() {
-	$('.add-bookmark-section').on('click', '.submit-bookmark-button', event => {
-		event.preventDefault();
-		const newBookmark = $(this).serializeJson();
-		console.log(newBookmark);
-		api.createBookmarks(newBookmark, (bookmark) => {
-			STORE.bookmarks.push(bookmark);
-			console.log(STORE);
+	function handleAddBookmarksButtonClicked() {
+		// add bookmarks to list
+		// re-render with add bookmark menu: name, url, description, rating, hidden id, add and cancel buttons
+		// submit adds new item to local store and api
+		$('.add-bookmark-button').on('click', () => {
+			STORE.adding = true;
 			renderBookmarks();
 		});
-	});
-}
+	}
 
-$.fn.extend({
-	serializeJson : function() {
-		const title = $('#name').val();
-		const url = $('#url').val();
-		const rating = $('.rating-buttons:checked').val();
-		const description = $('#description').val();
-		const data = {title, url, rating, description};
-		return JSON.stringify(data);
+	function handleCancelAddBookmarks() {
+		$('.add-bookmark-section').on('click', '.cancel-add-bookmark-button', () => {
+			STORE.adding = false;
+			renderBookmarks();
+		});
+	}
+
+	function handleAddNewBookmark() {
+		$('.add-bookmark-section').on('click', '.submit-bookmark-button', event => {
+			event.preventDefault();
+			const newBookmark = $(this).serializeJson();
+			console.log(newBookmark);
+			api.createBookmarks(newBookmark, (bookmark) => {
+				STORE.bookmarks.push(bookmark);
+				renderBookmarks();
+			},
+			(err) => {
+				console.log(err);
+				STORE.setError(err);
+				renderBookmarks();
+			});
+		});
+	}
+
+	$.fn.extend({
+		serializeJson : function() {
+			const title = $('#name').val();
+			const url = $('#url').val();
+			const rating = $('.rating-buttons:checked').val();
+			const description = $('#description').val();
+			const data = {title, url, rating, description};
+			return JSON.stringify(data);
 		// const formData = new FormData(document.getElementById('add-bookmark-form'));
 		// const bookmark = {};
 		// formData.forEach((value, name) => bookmark[name] = value);
 		// return JSON.stringify(bookmark);
+		}
+
+	});
+
+	function handleExpandedView() {
+		// click/keyboard on bookmark to see expanded view, 
+		//  update store, re-render to show title, description, url link button, rating, hide button
+		// select hide button to return to default view, update store, render
+		$('.js-bookmarks').on('click', '.expand-bookmark-button', (event) => {
+			STORE.toggleExpandOnBookmark(event.target);
+			renderBookmarks();
+		});
 	}
 
-});
+	function handleHideExpandedView() {
+		$('.js-bookmarks').on('click', '.hide-bookmark-button', () => {
+			STORE.toggleExpandOnBookmark(event.target);
+			renderBookmarks();
+		});
+	}
 
-function handleExpandedView() {
-// click/keyboard on bookmark to see expanded view, 
-//  update store, re-render to show title, description, url link button, rating, hide button
-// select hide button to return to default view, update store, render
-	$('.js-bookmarks').on('click', '.expand-bookmark-button', (event) => {
-		toggleExpandOnBookmark(event.target);
+	function handleDeleteBookmarks() {
+		// select delete button in expanded view, remove bookmark from store and api
+		// render
+		$('.js-bookmarks').on('click', '.delete-bookmark-button', event => {
+			const id = STORE.getBookmarkIdFromElement(event.target);
+			api.deleteBookmarks(id, () => {
+				STORE.deleteBookmarkInStore(id);
+				renderBookmarks();
+			},
+			(err) => {
+				console.log(err);
+				STORE.setError(err);
+				renderBookmarks();
+			});
+		});
+	}
+
+	function generateError(err) {
+		let message = '';
+		if (err.responseJSON && err.responseJSON.message) {
+			message = err.responseJSON.message;
+		} else {
+			message = `${err.code} Server Error`;
+		}
+
+		return `
+      <section class="error-content">
+        <button id="cancel-error">X</button>
+        <p>${message}</p>
+      </section>
+    `;
+	}
+
+	function handleCloseErrorWindow() {
+		$('.error').on('click', '#cancel-error', () => {
+			$('.error').empty();
+		});
+	}
+
+	function handleMinimumRatingFilter() {
+		// select a rating from minimum rating dropdown
+		// change store minimumRating, render filtered bookmarks
+		$('#minimum-rating-dropdown').on('change', event => {
+			const minimumRating = $(event.target).find(':selected').text();
+			STORE.toggleMinimumRating(parseInt(minimumRating));
+			console.log(STORE);
+			renderBookmarks();
+		});
+	
+	}
+
+	// function getBookmarksFromServer() {
+	// 	api.getBookmarks((bookmarks) => {
+	// 		bookmarks.forEach((bookmark) => {
+	// 			STORE.addBookmarkToStoreFromApi(bookmark);
+	// 			renderBookmarks();
+	// 		});
+	// 	}); 
+	// }
+
+	function bindEventListeners() {
 		renderBookmarks();
-	});
-}
+		handleAddNewBookmark();
+		handleAddBookmarksButtonClicked();
+		handleCancelAddBookmarks();
+		handleExpandedView();
+		handleHideExpandedView();
+		handleDeleteBookmarks();
+		handleMinimumRatingFilter();
+		handleCloseErrorWindow();
+	}
 
-function handleHideExpandedView() {
-	$('.js-bookmarks').on('click', '.hide-bookmark-button', () => {
-		toggleExpandOnBookmark(event.target);
-		renderBookmarks();
-	});
-}
+	return {
+		renderBookmarks,
+		bindEventListeners
+	};
+} ());
 
-function toggleExpandOnBookmark(target) {
-	const id = getBookmarkIdFromElement(target);
-	const bookmark = STORE.bookmarks.find(function(bookmark) {
-		return bookmark.id === id;
-	});
-	bookmark.expanded = !bookmark.expanded;
-}
 
-function getBookmarkIdFromElement(target) {
-	return $(target)
-		.closest('.bookmark')
-		.data('item-id');
-}
-
-function handleDeleteBookmarks() {
-// select delete button in expanded view, remove bookmark from store and api
-// render
-}
-
-function handleCannotSubmitBookmark() {
-// give userappropriate feedback if the submission fails
-// seek help here
-}
-
-function handleMinimumRatinfFilter() {
-// select a rating from minimum rating dropdown
-// change store minimumRating, render filtered bookmarks
-}
-
-function handleBookmarks() {
-	renderBookmarks();
-	handleAddNewBookmark();
-	handleAddBookmarksButtonClicked();
-	handleCancelAddBookmarks();
-	handleExpandedView();
-	handleHideExpandedView();
-	handleDeleteBookmarks();
-	handleCannotSubmitBookmark();
-	handleMinimumRatinfFilter();
-	getBookmarkIdFromElement();
-}
-
-$(handleBookmarks());

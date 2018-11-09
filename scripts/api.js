@@ -9,16 +9,14 @@ const api = (function () {
 		$.getJSON(`${BASE_URL}/bookmarks`, callback);
 	};
   
-	const createBookmarks = function(bookmark, callback) {
-        // const newItem = JSON.stringify({name: name});
-        // const newItem = JSON.stringify(name);
+	const createBookmarks = function(bookmark, onSuccess, onError) {
 		$.ajax({
 			url:`${BASE_URL}/bookmarks`,
 			method: 'POST',
 			contentType: 'application/json',
 			data: bookmark,
-			success: callback,
-			error: error => console.error(error.responseJSON.message)
+			success: onSuccess,
+			error: onError
 		});
 	};
   
@@ -32,13 +30,14 @@ const api = (function () {
 		});
 	};
   
-	const deleteBookmarks = function(id, callback) {
+	const deleteBookmarks = function(id, onSuccess, onError) {
 		$.ajax({
 			url: `${BASE_URL}/bookmarks/${id}`,
 			method: 'DELETE',
 			contentType: 'application/json',
 			// data: JSON.stringify(id),
-			success: callback
+			success: onSuccess,
+			error: onError
 		});
 	};
     
