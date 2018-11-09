@@ -5,23 +5,24 @@
 const api = (function () {
 	const BASE_URL = 'https://thinkful-list-api.herokuapp.com/barrett';
   
-	const getItems = function(callback) {
+	const getBookmarks = function(callback) {
 		$.getJSON(`${BASE_URL}/bookmarks`, callback);
 	};
   
-	const createItem = function(name, callback) {
-		const newItem = JSON.stringify({name: name});
+	const createBookmarks = function(bookmark, callback) {
+        // const newItem = JSON.stringify({name: name});
+        // const newItem = JSON.stringify(name);
 		$.ajax({
 			url:`${BASE_URL}/bookmarks`,
 			method: 'POST',
 			contentType: 'application/json',
-			data: newItem,
+			data: bookmark,
 			success: callback,
 			error: error => console.error(error.responseJSON.message)
 		});
 	};
   
-	const updateItem = function(id, updateData, callback) {
+	const updateBookmarks = function(id, updateData, callback) {
 		$.ajax({
 			url: `${BASE_URL}/bookmarks/${id}`,
 			method: 'PATCH',
@@ -31,7 +32,7 @@ const api = (function () {
 		});
 	};
   
-	const deleteItem = function(id, callback) {
+	const deleteBookmarks = function(id, callback) {
 		$.ajax({
 			url: `${BASE_URL}/bookmarks/${id}`,
 			method: 'DELETE',
@@ -44,9 +45,9 @@ const api = (function () {
     
   
 	return {
-		getItems,
-		createItem,
-		updateItem,
-		deleteItem
+		getBookmarks,
+		createBookmarks,
+		updateBookmarks,
+		deleteBookmarks
 	};
 }());

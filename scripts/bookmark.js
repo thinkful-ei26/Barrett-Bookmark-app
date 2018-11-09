@@ -4,27 +4,38 @@
 const STORE = {
 	bookmarks: [
 		{
-			name: 'bookmark',
-			rating: '1 star',
+			title: 'bookmark',
 			url: 'url_link',
+			rating: '1-star',
 			description: 'description string',
-			id: '',
+			id: 'asdjfnvbsi',
 			expanded: false,
 		}],
 	adding: false,
 	minimumRating: null,
 };
 
-function generateBookmarkDefaultElement(item, itemIndex, template) {
+function generateBookmarkDefaultElement(item) {
+	if (item.expanded === true)
+		return `
+			<li class="bookmark bookmark-expanded" data-item-id="${item.id}">
+				<p class="bookmark-name">${item.title}</p>
+				<p class="bookmark-description">${item.description}</p>
+				<span class="bookmark-rating">Rating: ${item.rating}</span>
+				<a target="blank" href="${item.url}"><button>Visit Site</button></a>
+				<button class="delete-bookmark-button">Delete</button>
+				<button class="hide-bookmark-button">Hide</button>
+			</li>`;
 	return `
-		<li class="bookmark-default data-item-id="${itemIndex}"> 
-			<p class="bookmark-name">${item.name}</p><button>Expand</button>
+		<li class="bookmark bookmark-default" data-item-id="${item.id}"> 
+			<p class="bookmark-name">${item.title}</p>
+			<button type="button" class="expand-bookmark-button">Expand</button>
 			<span class="bookmark-rating">Rating: ${item.rating}</span>
 		</li>`;
 }
 
 function generateBookmarkDefaultItemString(bookmarks) {
-	const items = bookmarks.map((item, index) => generateBookmarkDefaultElement(item, index));
+	const items = bookmarks.map((item) => generateBookmarkDefaultElement(item));
 	return items.join('');
 }
 
@@ -47,11 +58,11 @@ function renderBookmarks() {
 				<input type="text" name="newBookmarkDescription" id="description" class="js-new-bookmark-description">
 		</div>
 		<section class="rating-buttons">
-				<input type="radio" name="rating" id="rating" value="1-star">1 star<br>
-				<input type="radio" name="rating" value="2-stars">2 stars<br>
-				<input type="radio" name="rating" value="3-stars">3 stars<br>
-				<input type="radio" name="rating" value="4-stars">4 stars<br>
-				<input type="radio" name="rating" value="5-stars">5 stars<br>
+				<input type="radio" name="rating" class="rating-buttons" value="1">1 star<br>
+				<input type="radio" name="rating" class="rating-buttons" value="2">2 stars<br>
+				<input type="radio" name="rating" class="rating-buttons" value="3">3 stars<br>
+				<input type="radio" name="rating" class="rating-buttons" value="4">4 stars<br>
+				<input type="radio" name="rating" class="rating-buttons" value="5">5 stars<br>
 		</section>
 		<input class="submit-bookmark-button" type="submit" value="Submit">
 		<button type="button" class="cancel-add-bookmark-button">Cancel</button>
@@ -63,8 +74,8 @@ function renderBookmarks() {
 	}
 	const bookmarkDefaultItemString = generateBookmarkDefaultItemString(STORE.bookmarks); 
 	$('.js-bookmarks').html(bookmarkDefaultItemString);
-
 }
+
 
 
 function handleAddBookmarksButtonClicked() {
@@ -87,19 +98,23 @@ function handleCancelAddBookmarks() {
 function handleAddNewBookmark() {
 	$('.add-bookmark-section').on('click', '.submit-bookmark-button', event => {
 		event.preventDefault();
-		console.log('something happened');
 		const newBookmark = $(this).serializeJson();
-		api.createItem(newBookmark, (newItem) => {
-			STORE.bookmarks.push(newBookmark);
+		console.log(newBookmark);
+		api.createBookmarks(newBookmark, (bookmark) => {
+			STORE.bookmarks.push(bookmark);
 			console.log(STORE);
+			renderBookmarks();
 		});
 	});
 }
 
 $.fn.extend({
-
 	serializeJson : function() {
-		const data = {name: $('#name').val(), rating: $('#rating').val(), url: $('#url').val(), description: $('#description').val()};
+		const title = $('#name').val();
+		const url = $('#url').val();
+		const rating = $('.rating-buttons:checked').val();
+		const description = $('#description').val();
+		const data = {title, url, rating, description};
 		return JSON.stringify(data);
 		// const formData = new FormData(document.getElementById('add-bookmark-form'));
 		// const bookmark = {};
@@ -113,6 +128,31 @@ function handleExpandedView() {
 // click/keyboard on bookmark to see expanded view, 
 //  update store, re-render to show title, description, url link button, rating, hide button
 // select hide button to return to default view, update store, render
+	$('.js-bookmarks').on('click', '.expand-bookmark-button', (event) => {
+		toggleExpandOnBookmark(event.target);
+		renderBookmarks();
+	});
+}
+
+function handleHideExpandedView() {
+	$('.js-bookmarks').on('click', '.hide-bookmark-button', () => {
+		toggleExpandOnBookmark(event.target);
+		renderBookmarks();
+	});
+}
+
+function toggleExpandOnBookmark(target) {
+	const id = getBookmarkIdFromElement(target);
+	const bookmark = STORE.bookmarks.find(function(bookmark) {
+		return bookmark.id === id;
+	});
+	bookmark.expanded = !bookmark.expanded;
+}
+
+function getBookmarkIdFromElement(target) {
+	return $(target)
+		.closest('.bookmark')
+		.data('item-id');
 }
 
 function handleDeleteBookmarks() {
@@ -136,10 +176,11 @@ function handleBookmarks() {
 	handleAddBookmarksButtonClicked();
 	handleCancelAddBookmarks();
 	handleExpandedView();
+	handleHideExpandedView();
 	handleDeleteBookmarks();
 	handleCannotSubmitBookmark();
 	handleMinimumRatinfFilter();
-	
+	getBookmarkIdFromElement();
 }
 
 $(handleBookmarks());
