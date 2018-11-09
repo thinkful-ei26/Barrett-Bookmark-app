@@ -34,20 +34,20 @@ function renderBookmarks() {
 // only name and rating, no rating filter on, add button and minimum rating dropdown
 	if (STORE.adding === true) {
 		const addBookmarkForm = `
-	<form id="add-bookmark-form">
+	<form id="add-bookmark-form" name="newBookmarkForm">
                 
 		<label for="name">New Bookmark Name:</label>
-		<input type="text" name="new-bookmark-name" id="name" class="js-new-bookmark-name">
+		<input type="text" name="newBookmarkName" id="name" class="js-new-bookmark-name">
 		
 		<label for="url">URL:</label>
-		<input type="text" name="new-bookmark-url" id="url" class="js-new-bookmark-url">
+		<input type="text" name="newBookmarkUrl" id="url" class="js-new-bookmark-url">
 		
 		<div>
 				<label for="description">Description:</label>
-				<input type="text" name="new-bookmark-description" id="description" class="js-new-bookmark-description">
+				<input type="text" name="newBookmarkDescription" id="description" class="js-new-bookmark-description">
 		</div>
 		<section class="rating-buttons">
-				<input type="radio" name="rating" value="1-star">1 star<br>
+				<input type="radio" name="rating" id="rating" value="1-star">1 star<br>
 				<input type="radio" name="rating" value="2-stars">2 stars<br>
 				<input type="radio" name="rating" value="3-stars">3 stars<br>
 				<input type="radio" name="rating" value="4-stars">4 stars<br>
@@ -73,7 +73,6 @@ function handleAddBookmarksButtonClicked() {
 // submit adds new item to local store and api
 	$('.add-bookmark-button').on('click', () => {
 		STORE.adding = true;
-		console.log(STORE.adding);
 		renderBookmarks();
 	});
 }
@@ -86,11 +85,29 @@ function handleCancelAddBookmarks() {
 }
 
 function handleAddNewBookmark() {
-	$('.add-bookmark-section').on('submit', 'submit-bookmark-button', event => {
+	$('.add-bookmark-section').on('click', '.submit-bookmark-button', event => {
 		event.preventDefault();
 		console.log('something happened');
+		const newBookmark = $(this).serializeJson();
+		api.createItem(newBookmark, (newItem) => {
+			STORE.bookmarks.push(newBookmark);
+			console.log(STORE);
+		});
 	});
 }
+
+$.fn.extend({
+
+	serializeJson : function() {
+		const data = {name: $('#name').val(), rating: $('#rating').val(), url: $('#url').val(), description: $('#description').val()};
+		return JSON.stringify(data);
+		// const formData = new FormData(document.getElementById('add-bookmark-form'));
+		// const bookmark = {};
+		// formData.forEach((value, name) => bookmark[name] = value);
+		// return JSON.stringify(bookmark);
+	}
+
+});
 
 function handleExpandedView() {
 // click/keyboard on bookmark to see expanded view, 
