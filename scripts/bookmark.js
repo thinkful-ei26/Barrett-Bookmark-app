@@ -8,7 +8,7 @@ const bookmark = (function () {
 			return `
 			<li class="bookmark bookmark-expanded" data-item-id="${item.id}">
 				<p class="bookmark-name">${item.title}</p>
-				<p class="bookmark-description">${item.description}</p>
+				<p class="bookmark-desc">${item.desc}</p>
 				<span class="bookmark-rating">Rating: ${item.rating}</span>
 				<a target="blank" href="${item.url}"><button>Visit Site</button></a>
 				<button class="delete-bookmark-button">Delete</button>
@@ -60,8 +60,8 @@ const bookmark = (function () {
 		<input type="text" name="newBookmarkUrl" id="url" class="js-new-bookmark-url">
 		
 		<div>
-				<label for="description">Description:</label>
-				<input type="text" name="newBookmarkDescription" id="description" class="js-new-bookmark-description">
+				<label for="desc">Description:</label>
+				<input type="text" name="newBookmarkDesc" id="desc" class="js-new-bookmark-desc">
 		</div>
 		<section class="rating-buttons">
 				<input type="radio" name="rating" class="rating-buttons" value="1">1 star<br>
@@ -121,8 +121,8 @@ const bookmark = (function () {
 			const title = $('#name').val();
 			const url = $('#url').val();
 			const rating = $('.rating-buttons:checked').val();
-			const description = $('#description').val();
-			const data = {title, url, rating, description};
+			const desc = $('#desc').val();
+			const data = {title, url, rating, desc};
 			return JSON.stringify(data);
 		// const formData = new FormData(document.getElementById('add-bookmark-form'));
 		// const bookmark = {};
