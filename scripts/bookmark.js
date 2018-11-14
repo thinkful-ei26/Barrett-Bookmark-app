@@ -36,6 +36,7 @@ const bookmark = (function () {
 		let bookmarks = [ ...STORE.bookmarks];
 
 		if (STORE.error) {
+			
 			const el = generateError(STORE.error);
 			$('.error').html(el);
 		} else {
@@ -50,11 +51,13 @@ const bookmark = (function () {
 		$('.js-bookmarks').html(bookmarkDefaultItemString);
 
 		if (STORE.adding === true) {
+			let nameLbl = $('#name');
+			let nameTxt = (nameLbl.length) ? nameLbl.val() : ''; // ()?:; ternary operator
 			const addBookmarkForm = `
 	<form id="add-bookmark-form" name="newBookmarkForm">
                 
 		<label for="name">New Bookmark Name:</label>
-		<input type="text" name="newBookmarkName" id="name" class="js-new-bookmark-name">
+		<input type="text" name="newBookmarkName" id="name" class="js-new-bookmark-name" value="${nameTxt}">
 		
 		<label for="url">URL:</label>
 		<input type="text" name="newBookmarkUrl" id="url" class="js-new-bookmark-url">
