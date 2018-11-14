@@ -1,5 +1,6 @@
 * {
     box-sizing: border-box;
+    background-color: aliceblue;
 }
 
 body {
@@ -34,4 +35,8 @@ body {
 
 .error-content{
     border: 1px solid red;
+}
+
+.rating-button-field {
+    border: none;
 }

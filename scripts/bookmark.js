@@ -23,7 +23,6 @@ const bookmark = (function () {
 	}
 
 	function generateBookmarkDefaultItemString(bookmarks) {
-		console.log(bookmarks);
 		const items = bookmarks.map((item) => generateBookmarkDefaultElement(item));
 	
 		return items.join('');
@@ -36,9 +35,9 @@ const bookmark = (function () {
 		let bookmarks = [ ...STORE.bookmarks];
 
 		if (STORE.error) {
-			
 			const el = generateError(STORE.error);
 			$('.error').html(el);
+			STORE.error = false;
 		} else {
 			$('.error').empty();
 		}
@@ -51,30 +50,39 @@ const bookmark = (function () {
 		$('.js-bookmarks').html(bookmarkDefaultItemString);
 
 		if (STORE.adding === true) {
-			let nameLbl = $('#name');
-			let nameTxt = (nameLbl.length) ? nameLbl.val() : ''; // ()?:; ternary operator
+			const nameLbl = $('#name');
+			const nameTxt = (nameLbl.length) ? nameLbl.val() : ''; // ()?:; ternary operator
+			const urlLbl = $('#url');
+			const urlTxt = (urlLbl.length) ? urlLbl.val() : '';
+			const descLbl = $('#desc');
+			const descTxt = (descLbl.length) ? descLbl.val() : '';
 			const addBookmarkForm = `
 	<form id="add-bookmark-form" name="newBookmarkForm">
-                
-		<label for="name">New Bookmark Name:</label>
-		<input type="text" name="newBookmarkName" id="name" class="js-new-bookmark-name" value="${nameTxt}">
-		
-		<label for="url">URL:</label>
-		<input type="text" name="newBookmarkUrl" id="url" class="js-new-bookmark-url">
-		
-		<div>
-				<label for="desc">Description:</label>
-				<input type="text" name="newBookmarkDesc" id="desc" class="js-new-bookmark-desc">
-		</div>
-		<section class="rating-buttons">
-				<input type="radio" name="rating" class="rating-buttons" value="1">1 star<br>
-				<input type="radio" name="rating" class="rating-buttons" value="2">2 stars<br>
-				<input type="radio" name="rating" class="rating-buttons" value="3">3 stars<br>
-				<input type="radio" name="rating" class="rating-buttons" value="4">4 stars<br>
-				<input type="radio" name="rating" class="rating-buttons" value="5">5 stars<br>
-		</section>
-		<input class="submit-bookmark-button" type="submit" value="Submit">
-		<button type="button" class="cancel-add-bookmark-button">Cancel</button>
+		 <fieldset>
+		 <legend>Add a new bookmark</legend>
+			<label for="name">New Bookmark Name:</label>
+			<input type="text" name="newBookmarkName" id="name" class="js-new-bookmark-name" value="${nameTxt}">
+			
+			<label for="url">URL:</label>
+			<input type="text" name="newBookmarkUrl" id="url" class="js-new-bookmark-url" value="${urlTxt}">
+			
+			<div>
+					<label for="desc">Description:</label>
+					<input type="text" name="newBookmarkDesc" id="desc" class="js-new-bookmark-desc" value="${descTxt}">
+			</div>
+			<fieldset class="rating-button-field">
+				<legend>Rate bookmark:</legend>
+					<section id="ratingButtons" class="rating-buttons">
+						<input type="radio" aria-label="1-star" name="rating" class="rating-buttons" aria-checked="false" value="1">1 star<br>
+						<input type="radio" aria-label="2-stars" name="rating" class="rating-buttons" aria-checked="false" value="2">2 stars<br>
+						<input type="radio" aria-label="3-stars" name="rating" class="rating-buttons" aria-checked="false" value="3">3 stars<br>
+						<input type="radio" aria-label="4-stars" name="rating" class="rating-buttons" aria-checked="false" value="4">4 stars<br>
+						<input type="radio" aria-label="5-stars" name="rating" class="rating-buttons" aria-checked="false" value="5">5 stars<br>
+					</section>
+			</fieldset>
+			<input class="submit-bookmark-button" type="submit" value="Submit">
+			<button type="button" class="cancel-add-bookmark-button">Cancel</button>
+		</fieldset>
 	</form>`;
 			$('.add-bookmark-section').html(addBookmarkForm);
 		}
@@ -106,13 +114,11 @@ const bookmark = (function () {
 		$('.add-bookmark-section').on('click', '.submit-bookmark-button', event => {
 			event.preventDefault();
 			const newBookmark = $(this).serializeJson();
-			console.log(newBookmark);
 			api.createBookmarks(newBookmark, (bookmark) => {
 				STORE.bookmarks.push(bookmark);
 				renderBookmarks();
 			},
 			(err) => {
-				console.log(err);
 				STORE.setError(err);
 				renderBookmarks();
 			});
@@ -162,7 +168,6 @@ const bookmark = (function () {
 				renderBookmarks();
 			},
 			(err) => {
-				console.log(err);
 				STORE.setError(err);
 				renderBookmarks();
 			});
@@ -197,7 +202,6 @@ const bookmark = (function () {
 		$('#minimum-rating-dropdown').on('change', event => {
 			const minimumRating = $(event.target).find(':selected').text();
 			STORE.toggleMinimumRating(parseInt(minimumRating));
-			console.log(STORE);
 			renderBookmarks();
 		});
 	
